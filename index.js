@@ -19,6 +19,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const menuCollection = client.db('foodiesCuisine').collection('allMenu');
+        const orderCollection = client.db('foodiesCuisine').collection('ordersList');
 
         //all menus api for read all menus 
         app.get('/allmenu', async (req, res) => {
@@ -42,6 +43,28 @@ async function run() {
             const menu = await menuCollection.findOne(query);
             res.send(menu);
         });
+        
+        //orders api (get data)
+        app.get('/orders', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+
+        });
+
+        // data create for orders
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = orderCollection.insertOne(order);
+            res.send(result);
+
+        })
 
 
 
