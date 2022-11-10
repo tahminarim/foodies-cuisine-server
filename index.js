@@ -18,6 +18,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 //crud operations
 async function run() {
     try {
+        const addMenuCollection = client.db('foodiesCuisine').collection('addMenu');
         const menuCollection = client.db('foodiesCuisine').collection('allMenu');
         const userCollection = client.db('foodiesCuisine').collection('users');
         const orderCollection = client.db('foodiesCuisine').collection('ordersList');
@@ -71,6 +72,30 @@ async function run() {
 
         })
 
+        //reviews for a user api (get data)
+        app.get('/myreviews', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = reviewsCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+
+        });
+
+        //delete a review
+
+        app.delete('/reviews/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await reviewsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
         //orders api (get data)
         app.get('/orders', async (req, res) => {
             let query = {};
@@ -85,6 +110,27 @@ async function run() {
 
         });
 
+        // data create for adding menu
+        app.post('/addmenu', async (req, res) => {
+            const menu = req.body;
+            const result = addMenuCollection.insertOne(menu);
+            res.send(result);
+
+        })
+
+        app.get('/addmenu', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = addMenuCollection.find(query);
+            const menus = await cursor.toArray();
+            res.send(menus);
+
+        });
+
         // data create for orders
         app.post('/orders', async (req, res) => {
             const order = req.body;
@@ -92,10 +138,6 @@ async function run() {
             res.send(result);
 
         })
-
-
-
-
 
         // users get data
         app.get('/users', async (req, res) => {
@@ -115,6 +157,21 @@ async function run() {
 
 
 
+
+        //patch   update
+
+        app.patch('/reviews/:id', async (req, res) => {
+            const id = req.params.id;
+            const message = req.body
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    message: message
+                }
+            }
+            const result = await reviewsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
 
 
 
