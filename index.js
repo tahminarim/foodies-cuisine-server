@@ -19,7 +19,9 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const menuCollection = client.db('foodiesCuisine').collection('allMenu');
+        const userCollection = client.db('foodiesCuisine').collection('users');
         const orderCollection = client.db('foodiesCuisine').collection('ordersList');
+        const reviewsCollection = client.db('foodiesCuisine').collection('reviews');
 
         //all menus api for read all menus 
         app.get('/allmenu', async (req, res) => {
@@ -43,7 +45,32 @@ async function run() {
             const menu = await menuCollection.findOne(query);
             res.send(menu);
         });
-        
+        //reviws
+        app.get('/reviews/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await orderCollection.findOne(query);
+            console.log(order);
+            res.send(order);
+
+        });
+
+        //all reviws api for read all reviws
+        app.get('/reviews', async (req, res) => {
+            const query = {}
+            const cursor = reviewsCollection.find(query);
+            const reviws = await cursor.toArray();
+            res.send(reviws);
+        });
+
+        // data create for reviws
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = reviewsCollection.insertOne(review);
+            res.send(result);
+
+        })
+
         //orders api (get data)
         app.get('/orders', async (req, res) => {
             let query = {};
@@ -65,6 +92,28 @@ async function run() {
             res.send(result);
 
         })
+
+
+
+
+
+        // users get data
+        app.get('/users', async (req, res) => {
+            const cursor = userCollection.find({});
+            const users = await cursor.toArray();
+            res.send(users);
+        })
+
+        // data create for users
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            // console.log(user);
+            const result = userCollection.insertOne(user);
+            res.send(result);
+
+        })
+
+
 
 
 
